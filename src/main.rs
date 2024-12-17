@@ -5,9 +5,13 @@ use std::{
 };
 
 fn main() {
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    let listener_res = TcpListener::bind("challenge01.root-me.org:52002"); // .unwrap();
+    let listener = match listener_res {
+        Ok(l) => Some(l),
+        Err(e) => {println!("{}", e); None},
+    };
  
-    for stream in listener.incoming() {
+    for stream in listener.unwrap().incoming() {
         let stream = stream.unwrap();
 
         handle_connection(stream);
@@ -22,19 +26,19 @@ fn handle_connection(mut stream: TcpStream) {
 
     println!("{}", request_line);
 
-    let (status_line, filename) = match request_line.as_str() { 
-        "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "hello.html"),
-        "GET /about HTTP/1.1" => ("HTTP/1.1 200 OK", "about.html"),
-        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
-    };
+    // let (status_line, filename) = match request_line.as_str() { 
+    //     "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "hello.html"),
+    //     "GET /about HTTP/1.1" => ("HTTP/1.1 200 OK", "about.html"),
+    //     _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    // };
 
-    let contents = fs::read_to_string(filename).unwrap();
-    let length = contents.len();
+    // let contents = fs::read_to_string(filename).unwrap();
+    // let length = contents.len();
 
-    // The \r\n... is the CRLF (carriage return and line feed)
-    let response = format!(
-        "{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}"
-    );
+    // // The \r\n... is the CRLF (carriage return and line feed)
+    // let response = format!(
+    //     "{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}"
+    // );
     
-    stream.write_all(response.as_bytes()).unwrap();
+    // stream.write_all(response.as_bytes()).unwrap();
 }
